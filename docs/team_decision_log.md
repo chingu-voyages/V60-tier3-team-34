@@ -8,36 +8,16 @@ To set this up add each teammates name in the `teammate name` column. Each
 team member should Place an 'X' under their name to vote for the ideas 
 you like the best.
 
-| No. | Question/Option | Teammate name | Teammate name | Teammate name | Teammate name | Teammate name | Teammate name |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | Team meeting schedule | | | | | | |
-|   |	- Sprint Planning Sunday@9:00 a.m. CST | | | | | | |
-|   |	- Knowledge Xfer as needed | | | | | | |
-|   |	- Working Session Thursday@4:00 p.m. CST | | | | | | |
-| 2	| Project Backlog Tool | | | | | | |
-|   |	- Notion | | | | | | |
-|   |	- Jira | | | | | | |
-| 3	| Technical Stack (vote by adding your pref. in the cell under your name) | | | | | | |
-|   |	- BE Language | | | | | | |
-|   |	- FE Language | | | | | | |
-|   |	- FE Framework | | | | | | |
-|   |	- ML Framework | | | | | | |
-|   |	- Visualization/Graphics package (if required, e.g. D3, Nivo, etc.) | | | | | | |
-| 4	| Where to host the app? | | | | | | |
-|   |	- Heroku (suitable for FE, BE, & Postgres) | | | | | | |
-|   |	- Netlify (suitable only for FE) | | | | | | |
-|   |	- Vercel (suitable only for FE) | | | | | | |
-|   |	- Mongo Atlas (suitable only for MongoDB) | | | | | | |
-| 5	| BE/FE repos organization | | | | | | |
-|   |	- Separate GitHub repos for each | | | | | | |
-|   |	- Single GitHub repo for both | | | | | | |
-| 6	| Wireframing tool | | | | | | |
-|   |	- Paper & pencil | | | | | | |
-|   |	- Adobe XD | | | | | | |
-|   |	- Balsamiq | | | | | | |
-|   |	- Figma | | | | | | |
-| 7	| Who works in which part of the app? | | | | | | |
-|   | - BE (not applicable for Tier 1 teams) | | | | | | |
-|   |	- FE | | | | | | |
-| 8	| ... | | | | | | |
-| n | ... | | | | | | |
+| No. | Item | Decision 
+| :--- | :--- | :--- |
+| 1 | Do we try to work ahead of the handbook schedule? | Whenever possible we should work ahead |
+| 2 | What are our meeting days?| Mon - Sat|
+| 3 | Combine Review, Retrospective, Planning meetings? | Yes all in one Sat 3:30PM EDT |
+| 4 | How often do we have live Standup Meetings?| M, W, Fri 3:30P EDT, Other times report in #Standup using the /standup command |
+| 5 | What do we use for live meetings? | Discord |
+| 6 | What work tracking tool do we use? | [GitHub Projects](https://github.com/orgs/chingu-voyages/projects/384) |
+| 7 | Def of Ready - DOR | No outstanding questions, Estimated, broken into task (if necessary) |
+| 8 | Def of Done - DOD | Approved by PO, merged to Dev branch, avalible on test site |
+| 9 | Where do the points live | Points are on the story only |
+| 10 | When / Where do we deploy code | Deploy  to test site for PO to approve as soon as it is approved. The goal is to deploy to main at the end of each sprint |
+| 11 | What project are we doing? | After a LONG discussion we decided on the CramerBot project |
