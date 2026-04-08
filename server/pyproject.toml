@@ -1,0 +1,9 @@
+[project]
+name = "Reverse Cramer server"
+version = "0.1.0"
+description = "Server for Reverse Cramer Project"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.135.3",
+    "playwright>=1.58.0",
+]
