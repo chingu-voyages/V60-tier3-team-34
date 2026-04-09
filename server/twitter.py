@@ -1,7 +1,7 @@
 from playwright.async_api import async_playwright
 from typing import List, Dict
 
-async def scrape_tweet(limit: int = 20) -> List[Dict[str, str]]:
+async def scrape_tweet(limit: int = 20, max_scroll_attempts: int = 30) -> List[Dict[str, str]]:
     playwright = await async_playwright().start()
     try:
         device = playwright.devices["Desktop Chrome"]
@@ -14,8 +14,7 @@ async def scrape_tweet(limit: int = 20) -> List[Dict[str, str]]:
 
             tweets_locator = page.locator('[data-testid="tweetText"]')
             attempts = 0
-            max_attempts = 10
-            while await tweets_locator.count() < limit and attempts < max_attempts:
+            while await tweets_locator.count() < limit and attempts < max_scroll_attempts:
                 await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
                 await page.wait_for_timeout(1000)
                 attempts += 1
