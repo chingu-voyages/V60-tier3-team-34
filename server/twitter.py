@@ -20,11 +20,11 @@ class TwitterScraper:
         self.playwright = None
         # Expanded list of working mirrors for better resilience
         self.nitter_mirrors = [
+            "https://nitter.net",
             "https://nitter.poast.org", 
-            "https://xcancel.com",
-            "https://nitter.privacydev.net",
-            "https://nitter.pericles.lgbt",
-            "https://nitter.it"
+            "https://nitter.privacyredirect.com",
+            "https://nitter.uni-sonia.com",
+            "https://xcancel.com"
         ]
 
     async def __aenter__(self):
