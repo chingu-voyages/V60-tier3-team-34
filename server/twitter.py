@@ -40,8 +40,9 @@ class TwitterScraper:
         
         # Create context with a more realistic user agent and viewport
         self.context = await self.browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={'width': 1280, 'height': 800}
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+            viewport={'width': 1280, 'height': 800},
+            device_scale_factor=1
         )
         
         # Add script to further hide automation
