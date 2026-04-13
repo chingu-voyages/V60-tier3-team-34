@@ -50,6 +50,14 @@ class TwitterScraper:
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
             });
+            // Overwrite the 'plugins' property to look more natural
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5]
+            });
+            // Overwrite the 'languages' property
+            Object.defineProperty(navigator, 'languages', {
+                get: () => ['en-US', 'en']
+            });
         """)
         
         self.page = await self.context.new_page()
