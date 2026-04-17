@@ -90,3 +90,35 @@ If you need to revert the last applied migration:
 ```bash
 uv run alembic downgrade -1
 ```
+
+## 5. Data Importing & Seeding
+
+### Importing Scraped JSON (`import_tweets.py`)
+To process scraped JSON files and insert them into the local database, use the `import_tweets.py` script. It automatically filters the tweets using `filter.py` and safely inserts them into the `tweets` table using an upsert strategy (ignoring duplicates).
+```bash
+uv run python import_tweets.py data/your_scraped_tweets.json
+```
+
+### Seeding Mock Data (`seed.py`)
+To insert standard mock data into the database (e.g., fake user profiles and sample tweets), use the `seed.py` script. It uses an upsert strategy, so it is safe to run multiple times without causing errors.
+```bash
+uv run python seed.py
+```
+
+## 6. Testing & Utilities
+
+### Automated Tests (`test_filter.py` & `conftest.py`)
+We use Pytest to automatically verify our application logic.
+- `test_filter.py`: Contains the unit tests and integration tests for the tweet filtering logic.
+- `conftest.py`: Stores our Pytest fixtures (like raw mock data and SQLAlchemy model instances) which are globally available to all tests.
+
+Run the test suite with:
+```bash
+uv run pytest
+```
+
+### Manual CLI Inspection (`run_filter.py`)
+If you want to view how the filter behaves on a specific JSON file *without* inserting anything into the database, use the `run_filter.py` tool. It prints a human-readable summary of the valid tweets directly to your console.
+```bash
+uv run python run_filter.py data/your_scraped_tweets.json
+```
