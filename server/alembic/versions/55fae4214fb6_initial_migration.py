@@ -42,7 +42,7 @@ def upgrade() -> None:
     sa.Column('risk_per_trade', sa.Integer(), nullable=True),
     sa.Column('max_positions', sa.Integer(), nullable=True),
     sa.Column('max_daily_trades', sa.Integer(), nullable=True),
-    sa.Column('min_ai_confidence', sa.Float(), nullable=True),
+    sa.Column('min_ai_confidence', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
