@@ -25,7 +25,6 @@ async def signal_feed_partial(request: Request, limit: int = Query(default=20, g
             select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
         )
         tweets = result.scalars().all()
-    return templates.TemplateResponse(
         return templates.TemplateResponse(
     "components/signal_feed.html",
     context={"request": request, "tweets": tweets}
