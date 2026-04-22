@@ -66,9 +66,29 @@
 
     </div>
 
-    <script>
-        lucide.createIcons();
-        document.body.addEventListener('htmx:afterSwap', () => lucide.createIcons());
-    </script>
+  <script>
+    lucide.createIcons();
+
+    fetch('/api/signal-feed')
+        .then(r => r.json())
+        .then(tweets => {
+            const container = document.getElementById('tweets-container');
+            if (!tweets.length) {
+                container.innerHTML = '<div class="px-4 py-8 text-center text-gray-500 text-sm">No hay tweets</div>';
+                return;
+            }
+            container.innerHTML = tweets.map(t => `
+                <div class="px-4 py-3 hover:bg-gray-900 transition">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold text-white">@jimcramer</span>
+                        <span class="text-xs text-gray-500">${t.created_at ? t.created_at.slice(0,10) : ''}</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-2 leading-relaxed">${t.text || ''}</p>
+                    ${t.link ? `<a href="${t.link}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300">Ver tweet</a>` : ''}
+                </div>
+            `).join('');
+        });
+</script>
+
 </body>
 </html>
