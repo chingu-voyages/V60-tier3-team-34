@@ -16,7 +16,7 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse("dashboard.html", context={"request": request})
 
 @app.get("/api/signal-feed", response_class=HTMLResponse)
 async def signal_feed_partial(request: Request, limit: int = Query(default=20, ge=1, le=100)):
