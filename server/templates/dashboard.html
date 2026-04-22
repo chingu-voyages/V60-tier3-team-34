@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CramerBot Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { background: #0f0f0f; color: white; }
@@ -46,49 +45,101 @@
 
     <div class="flex h-[calc(100vh-57px)] overflow-hidden">
 
-<aside class="w-64 flex-shrink-0 border-r border-gray-800 overflow-y-auto bg-[#111]" id="signal-feed">
-    <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-800 sticky top-0 bg-[#111]">
-        <span class="text-sm font-semibold text-gray-300">Live Signal Feed</span>
-    </div>
-    <div id="tweets-container" class="divide-y divide-gray-800">
-        <div class="px-4 py-8 text-center text-gray-600 text-sm">Cargando...</div>
-    </div>
-</aside>
+        <!-- LEFT: Live Signal Feed -->
+        <aside class="w-64 flex-shrink-0 border-r border-gray-800 overflow-y-auto bg-[#111]">
 
+            <!-- Header -->
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-800 sticky top-0 bg-[#111] z-10">
+                <i data-lucide="rss" class="w-4 h-4 text-green-400"></i>
+                <span class="text-sm font-semibold text-gray-300">Live Signal Feed</span>
+            </div>
 
+            <!-- Filtro por tickers -->
+            <div class="px-3 py-2 border-b border-gray-800 bg-[#111] sticky top-10 z-10">
+                <div class="flex gap-1">
+                    <input
+                        id="ticker-input"
+                        type="text"
+                        placeholder="AAPL, NVDA, MSFT..."
+                        class="flex-1 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-green-500"
+                    />
+                    <button
+                        onclick="loadFeed()"
+                        class="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded transition">
+                        <i data-lucide="search" class="w-3 h-3"></i>
+                    </button>
+                    <button
+                        onclick="clearFilter()"
+                        class="bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded transition">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tweet list -->
+            <div id="tweets-container" class="divide-y divide-gray-800">
+                <div class="px-4 py-8 text-center text-gray-600 text-sm">Cargando...</div>
+            </div>
+
+        </aside>
+
+        <!-- CENTER -->
         <main class="flex-1 overflow-y-auto p-6">
             <p class="text-gray-500 text-sm">Próximo paso: Stats Bar y Chart</p>
         </main>
 
+        <!-- RIGHT -->
         <aside class="w-80 flex-shrink-0 border-l border-gray-800 overflow-y-auto bg-[#111] p-4">
             <p class="text-gray-500 text-sm">Próximo paso: Panel de trading</p>
         </aside>
 
     </div>
 
-  <script>
-    lucide.createIcons();
+    <script>
+        lucide.createIcons();
 
-    fetch('/api/signal-feed')
-        .then(r => r.json())
-        .then(tweets => {
+        function loadFeed() {
+            const tickers = document.getElementById('ticker-input').value.trim();
+            const url = tickers ? `/api/signal-feed?tickers=${encodeURIComponent(tickers)}` : '/api/signal-feed';
             const container = document.getElementById('tweets-container');
-            if (!tweets.length) {
-                container.innerHTML = '<div class="px-4 py-8 text-center text-gray-500 text-sm">No hay tweets</div>';
-                return;
-            }
-            container.innerHTML = tweets.map(t => `
-                <div class="px-4 py-3 hover:bg-gray-900 transition">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-bold text-white">@jimcramer</span>
-                        <span class="text-xs text-gray-500">${t.created_at ? t.created_at.slice(0,10) : ''}</span>
-                    </div>
-                    <p class="text-xs text-gray-400 mb-2 leading-relaxed">${t.text || ''}</p>
-                    ${t.link ? `<a href="${t.link}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300">Ver tweet</a>` : ''}
-                </div>
-            `).join('');
-        });
-</script>
 
+            container.innerHTML = '<div class="px-4 py-8 text-center text-gray-600 text-sm">Cargando...</div>';
+
+            fetch(url)
+                .then(r => r.json())
+                .then(tweets => {
+                    if (!tweets.length) {
+                        container.innerHTML = '<div class="px-4 py-8 text-center text-gray-500 text-sm">No hay tweets para esos tickers</div>';
+                        return;
+                    }
+                    container.innerHTML = tweets.map(t => `
+                        <div class="px-4 py-3 hover:bg-gray-900 transition">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-bold text-white">@jimcramer</span>
+                                <span class="text-xs text-gray-500">${t.created_at ? t.created_at.slice(0, 10) : ''}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-2 leading-relaxed line-clamp-3">${t.text || ''}</p>
+                            ${t.link ? `<a href="${t.link}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300">Ver tweet</a>` : ''}
+                        </div>
+                    `).join('');
+                    lucide.createIcons();
+                });
+        }
+
+        function clearFilter() {
+            document.getElementById('ticker-input').value = '';
+            loadFeed();
+        }
+
+        // Cargar al inicio
+        loadFeed();
+
+        // Filtrar al presionar Enter
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('ticker-input').addEventListener('keydown', e => {
+                if (e.key === 'Enter') loadFeed();
+            });
+        });
+    </script>
 </body>
 </html>
