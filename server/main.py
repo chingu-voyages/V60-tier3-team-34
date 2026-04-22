@@ -25,10 +25,10 @@ async def signal_feed_partial(request: Request, limit: int = Query(default=20, g
             select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
         )
         tweets = result.scalars().all()
-        return templates.TemplateResponse(
-    "components/signal_feed.html",
-    context={"request": request, "tweets": tweets}
-)
+    return templates.TemplateResponse(
+        "components/signal_feed.html",
+        context={"request": request, "tweets": tweets}
+    )
 
 @app.get("/tweets")
 async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
@@ -47,4 +47,3 @@ async def get_users(limit: int = Query(default=5, ge=1, le=100)):
         )
         users = result.scalars().all()
         return [{col.name: getattr(u, col.name) for col in u.__table__.columns} for u in users]
-
