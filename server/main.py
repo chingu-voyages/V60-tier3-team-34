@@ -18,12 +18,22 @@ async def dashboard():
     return HTMLResponse(content=html_file.read_text())
 
 @app.get("/api/signal-feed")
-async def signal_feed_partial(limit: int = Query(default=20, ge=1, le=100)):
+async def signal_feed_partial(
+    limit: int = Query(default=20, ge=1, le=100),
+    tickers: str = Query(default="")
+):
     async with async_session_maker() as session:
-        result = await session.execute(
-            select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
-        )
+        query = select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
+
+        if tickers:
+            from sqlalchemy import or_
+            ticker_list = [t.strip().upper() for t in tickers.split(",") if t.strip()]
+            filters = [Tweet.tweet_text.ilike(f"%{ticker}%") for ticker in ticker_list]
+            query = query.where(or_(*filters))
+
+        result = await session.execute(query)
         tweets = result.scalars().all()
+
     return [
         {
             "text": t.tweet_text,
@@ -32,6 +42,7 @@ async def signal_feed_partial(limit: int = Query(default=20, ge=1, le=100)):
         }
         for t in tweets
     ]
+
 
 @app.get("/tweets")
 async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
