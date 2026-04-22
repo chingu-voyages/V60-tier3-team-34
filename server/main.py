@@ -1,7 +1,6 @@
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from db.database import async_session_maker
 from models.tweet import Tweet
@@ -11,24 +10,28 @@ from pathlib import Path
 app = FastAPI()
 
 BASE_DIR = Path(__file__).parent
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", context={"request": request})
+async def dashboard():
+    html_file = BASE_DIR / "templates" / "dashboard.html"
+    return HTMLResponse(content=html_file.read_text())
 
-@app.get("/api/signal-feed", response_class=HTMLResponse)
-async def signal_feed_partial(request: Request, limit: int = Query(default=20, ge=1, le=100)):
+@app.get("/api/signal-feed")
+async def signal_feed_partial(limit: int = Query(default=20, ge=1, le=100)):
     async with async_session_maker() as session:
         result = await session.execute(
             select(Tweet).order_by(Tweet.created_at.desc()).limit(limit)
         )
         tweets = result.scalars().all()
-    return templates.TemplateResponse(
-        "components/signal_feed.html",
-        context={"request": request, "tweets": tweets}
-    )
+    return [
+        {
+            "text": t.tweet_text,
+            "link": t.tweet_link,
+            "created_at": str(t.created_at)
+        }
+        for t in tweets
+    ]
 
 @app.get("/tweets")
 async def get_tweets(limit: int = Query(default=5, ge=1, le=100)):
