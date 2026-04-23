@@ -21,6 +21,7 @@ class TwitterScraper:
         self.context = None
         self.page: Optional[Page] = None
         self.playwright = None
+        self.supabase: Optional[Client] = None
         # Expanded list of working mirrors for better resilience
         self.nitter_mirrors = [
             "https://nitter.net",
@@ -29,6 +30,16 @@ class TwitterScraper:
             "https://nitter.uni-sonia.com",
             "https://xcancel.com"
         ]
+        
+        # Initialize Supabase client if credentials are available
+        load_dotenv()
+        supabase_url = os.getenv('SUPABASE_URL')
+        supabase_key = os.getenv('SUPABASE_SECRET_KEY')
+        if supabase_url and supabase_key:
+            try:
+                self.supabase = create_client(supabase_url, supabase_key)
+            except Exception as e:
+                print(f"Warning: Failed to initialize Supabase client: {e}")
 
     async def __aenter__(self):
         self.playwright = await async_playwright().start()
@@ -755,7 +766,7 @@ class TwitterScraper:
 
     def save_to_supabase(self, tweets: List[Dict]) -> int:
         """Save tweets to Supabase database with deduplication"""
-        if not supabase:
+        if not self.supabase:
             print("Warning: Supabase client not initialized. Skipping database save.")
             return 0
         
@@ -774,7 +785,7 @@ class TwitterScraper:
                 }
                 
                 # Use upsert to handle duplicates (url is unique)
-                result = supabase.table('tweets').upsert(
+                result = self.supabase.table('tweets').upsert(
                     tweet_data,
                     on_conflict='url'
                 ).execute()
