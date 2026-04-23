@@ -775,7 +775,9 @@ class TwitterScraper:
         try:
             # Get Claude service and analyze tweet
             claude_service = get_claude_service()
+            print(f"\nAnalyzing tweet: {tweet_text}")
             analysis = claude_service.analyze_tweet(tweet_text)
+            print(f"Claude API response: {analysis}")
             
             # Prepare sentiment data for Supabase
             sentiment_data = {
