@@ -49,7 +49,7 @@ Return ONLY the JSON, no other text."""
 
         try:
             message = self.client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-haiku-4-5-20251001",
                 max_tokens=1024,
                 messages=[
                     {
@@ -60,7 +60,7 @@ Return ONLY the JSON, no other text."""
             )
             
             response_text = message.content[0].text
-                        # Strip markdown code blocks if present
+            # Strip markdown code blocks if present
             response_text = response_text.strip()
             if response_text.startswith('```json'):
                 response_text = response_text[7:]  # Remove ```json
