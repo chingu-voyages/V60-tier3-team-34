@@ -2,7 +2,8 @@ import asyncio
 import json
 import argparse
 import os
-from datetime import datetime
+import uuid
+from datetime import datetime, timezone
 from typing import List, Dict, Optional
 from playwright.async_api import async_playwright, Page, Browser
 import pandas as pd
@@ -12,6 +13,7 @@ import re
 import urllib.parse
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from services.claude_service import get_claude_service
 
 
 class TwitterScraper:
@@ -21,6 +23,7 @@ class TwitterScraper:
         self.context = None
         self.page: Optional[Page] = None
         self.playwright = None
+        self.supabase: Optional[Client] = None
         # Expanded list of working mirrors for better resilience
         self.nitter_mirrors = [
             "https://nitter.net",
@@ -29,6 +32,16 @@ class TwitterScraper:
             "https://nitter.uni-sonia.com",
             "https://xcancel.com"
         ]
+        
+        # Initialize Supabase client if credentials are available
+        load_dotenv()
+        supabase_url = os.getenv('SUPABASE_URL')
+        supabase_key = os.getenv('SUPABASE_SECRET_KEY')
+        if supabase_url and supabase_key:
+            try:
+                self.supabase = create_client(supabase_url, supabase_key)
+            except Exception as e:
+                print(f"Warning: Failed to initialize Supabase client: {e}")
 
     async def __aenter__(self):
         self.playwright = await async_playwright().start()
@@ -753,9 +766,39 @@ class TwitterScraper:
         pd.DataFrame(tweets).to_csv(csv_file, index=False, encoding='utf-8')
         print(f"\n✓ Tweets saved to:\n  - {json_file}\n  - {csv_file}")
 
-    def save_to_supabase(self, tweets: List[Dict]) -> int:
-        """Save tweets to Supabase database with deduplication"""
-        if not supabase:
+    async def analyze_and_save_sentiment(self, tweet_timestamp: str, tweet_text: str):
+        """Analyze tweet sentiment and save to Supabase tweet_sentiments table"""
+        if not self.supabase:
+            print("Warning: Supabase client not initialized. Skipping sentiment analysis.")
+            return
+        
+        try:
+            # Get Claude service and analyze tweet
+            claude_service = get_claude_service()
+            print(f"\nAnalyzing tweet: {tweet_text}")
+            analysis = claude_service.analyze_tweet(tweet_text)
+            print(f"Claude API response: {analysis}")
+            
+            # Prepare sentiment data for Supabase
+            sentiment_data = {
+                'id': str(uuid.uuid4()),
+                'tweet_timestamp': tweet_timestamp,
+                'sentiment': analysis['sentiment'],
+                'confidence_score': analysis['confidence_score'],
+                'stock_tickers': analysis['stock_tickers'],
+                'analyzed_at': datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Save to tweet_sentiments table
+            self.supabase.table('tweet_sentiments').insert(sentiment_data).execute()
+            print(f"✓ Sentiment analyzed: {analysis['sentiment']} (confidence: {analysis['confidence_score']})")
+            
+        except Exception as e:
+            print(f"✗ Error analyzing sentiment for tweet {tweet_timestamp}: {e}")
+
+    async def save_to_supabase(self, tweets: List[Dict]) -> int:
+        """Save tweets to Supabase database with deduplication and trigger sentiment analysis"""
+        if not self.supabase:
             print("Warning: Supabase client not initialized. Skipping database save.")
             return 0
         
@@ -764,29 +807,51 @@ class TwitterScraper:
             return 0
         
         saved_count = 0
+        sentiment_tasks = []
+        
         for tweet in tweets:
             try:
                 # Prepare data for Supabase
                 tweet_data = {
-                    'text': tweet.get('text', ''),
-                    'timestamp': tweet.get('timestamp'),
-                    'url': tweet.get('url', '')
+                    'tweet_timestamp': tweet.get('timestamp'),
+                    'tweet_text': tweet.get('text', ''),
+                    'tweet_link': tweet.get('url', '')
                 }
                 
-                # Use upsert to handle duplicates (url is unique)
-                result = supabase.table('tweets').upsert(
+                # Use upsert to handle duplicates (tweet_timestamp is unique)
+                result = self.supabase.table('tweets').upsert(
                     tweet_data,
-                    on_conflict='url'
+                    on_conflict='tweet_timestamp'
                 ).execute()
                 
+                # Check if this was a new insert (not an update)
+                # If the result has data and it's not empty, it was created
+                is_new_tweet = len(result.data) > 0
+                
                 saved_count += 1
-                print(f"✓ Saved tweet to Supabase: {tweet_data['text'][:50]}...")
+                print(f"✓ Saved tweet to Supabase: {tweet_data['tweet_text'][:50]}...")
+                
+                # Trigger async sentiment analysis for new tweets only
+                if is_new_tweet and tweet.get('timestamp') and tweet.get('text'):
+                    task = asyncio.create_task(
+                        self.analyze_and_save_sentiment(
+                            tweet.get('timestamp'),
+                            tweet.get('text')
+                        )
+                    )
+                    sentiment_tasks.append(task)
                 
             except Exception as e:
                 print(f"✗ Error saving tweet to Supabase: {e}")
                 continue
         
         print(f"\n✓ Total tweets saved to Supabase: {saved_count}/{len(tweets)}")
+        
+        # Wait for all sentiment analysis tasks to complete (with error handling)
+        if sentiment_tasks:
+            print(f"\nRunning sentiment analysis on {len(sentiment_tasks)} new tweets...")
+            await asyncio.gather(*sentiment_tasks, return_exceptions=True)
+        
         return saved_count
 
 async def main():
@@ -842,11 +907,10 @@ async def main():
             print(f"\nSample tweet:\n  Time: {tweets[0]['timestamp']}\n  Text: {tweets[0]['text'][:100]}...")
             
             # Save to Supabase if configured
-            scraper.save_to_supabase(tweets)
+            await scraper.save_to_supabase(tweets)
         else:
             target = f"@{args.username}" if args.username else "batch input"
             print(f"\n✗ No tweets found for {target}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
