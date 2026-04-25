@@ -97,10 +97,19 @@
             <h2 class="font-semibold">Account Equity</h2>
             <p id="equity-change" class="text-sm text-gray-400 mt-0.5">Loading...</p>
           </div>
-          <div class="flex gap-2">
-            <button onclick="loadChart(30)" id="btn-30" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
-            <button onclick="loadChart(60)" id="btn-60" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
-            <button onclick="loadChart(90)" id="btn-90" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
+          <div class="flex gap-2 items-center">
+            <div class="flex gap-2">
+              <button onclick="loadChart(30)" id="btn-30" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
+              <button onclick="loadChart(60)" id="btn-60" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
+              <button onclick="loadChart(90)" id="btn-90" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
+            </div>
+            <button onclick="toggleChartExpand()"
+              class="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 transition"
+              title="Expand chart">
+              <svg id="chart-expand-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6v4m12-4h4v4M6 18h4v-4m12 4h-4v-4" />
+              </svg>
+            </button>
           </div>
         </div>
         <canvas id="equityChart" height="120"></canvas>
@@ -261,18 +270,60 @@
     </div>
   </div>
 
+  <!-- Expanded Chart Modal -->
+  <div id="chart-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div class="w-full h-full max-w-6xl max-h-[90vh] rounded-xl border border-gray-700 p-6 flex flex-col" style="background:#1a1d27">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="font-semibold text-lg">Account Equity - Full View</h2>
+          <p id="equity-change-expanded" class="text-sm text-gray-400 mt-1">Loading...</p>
+        </div>
+        <div class="flex gap-2 items-center">
+          <div class="flex gap-2">
+            <button onclick="loadChart(30)" id="btn-30-exp" class="px-3 py-1 text-xs rounded-lg bg-blue-600 text-white">30D</button>
+            <button onclick="loadChart(60)" id="btn-60-exp" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">60D</button>
+            <button onclick="loadChart(90)" id="btn-90-exp" class="px-3 py-1 text-xs rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600">90D</button>
+          </div>
+          <button onclick="toggleChartExpand()"
+            class="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 transition"
+            title="Collapse chart">
+            <svg id="chart-collapse-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7m0 0l-7 7m7-7H6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <canvas id="equityChartExpanded" class="flex-1"></canvas>
+    </div>
+  </div>
+
   <script>
     // ── State ─────────────────────────────────────────────
     let equityChart = null;
+    let equityChartExpanded = null;
     let allTrades = [];
     let currentFilter = 'All';
     let tradeSide = 'BUY';
     let tradeType = 'Market';
     let autoEnabled = false;
     let currentMode = 'manual';
+    let chartExpanded = false;
+    let currentChartDays = 30;
 
     function fmt(n) {
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+    }
+
+    // ── Chart Expand/Collapse ──────────────────────────────
+    function toggleChartExpand() {
+      chartExpanded = !chartExpanded;
+      const modal = document.getElementById('chart-modal');
+      if (chartExpanded) {
+        modal.classList.remove('hidden');
+        setTimeout(() => { loadChartExpanded(currentChartDays); }, 100);
+      } else {
+        modal.classList.add('hidden');
+      }
     }
 
     // ── Mode Toggle ────────────────────────────────────────
@@ -329,11 +380,58 @@
       } catch (e) { console.error('Stats error:', e); }
     }
 
+    // ── Chart Helper ───────────────────────────────────────
+    function createEquityChart(canvasId, data) {
+      const first = data.values[0], last = data.values[data.values.length - 1];
+      const change = last - first, changePct = ((change / first) * 100).toFixed(2);
+      const isPositive = change >= 0;
+      const color = isPositive ? '#34d399' : '#f87171';
+      
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return null;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      const existingChart = canvasId === 'equityChart' ? equityChart : equityChartExpanded;
+      if (existingChart) existingChart.destroy();
+
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            data: data.values,
+            borderColor: color,
+            backgroundColor: color + '22',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: canvasId === 'equityChart',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: '#1e2330' }, ticks: { color: '#6b7280', maxTicksLimit: 8 } },
+            y: { grid: { color: '#1e2330' }, ticks: { color: '#6b7280', callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
+          }
+        }
+      });
+    }
+
     // ── Chart ──────────────────────────────────────────────
     async function loadChart(days) {
+      currentChartDays = days;
       ['30','60','90'].forEach(d => {
-        const btn = document.getElementById('btn-' + d);
-        btn.className = 'px-3 py-1 text-xs rounded-lg ' + (d == days ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600');
+        document.getElementById('btn-' + d)?.classList.replace(...(d == days ? ['bg-gray-700', 'text-gray-400'] : ['bg-blue-600', 'text-white']));
+        document.getElementById('btn-' + d).className = 'px-3 py-1 text-xs rounded-lg ' + (d == days ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600');
+        document.getElementById('btn-' + d + '-exp')?.classList.replace(...(d == days ? ['bg-gray-700', 'text-gray-400'] : ['bg-blue-600', 'text-white']));
+        if (document.getElementById('btn-' + d + '-exp')) {
+          document.getElementById('btn-' + d + '-exp').className = 'px-3 py-1 text-xs rounded-lg ' + (d == days ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600');
+        }
       });
       try {
         const res = await fetch('/api/account-equity?days=' + days);
@@ -341,26 +439,29 @@
         const first = data.values[0], last = data.values[data.values.length - 1];
         const change = last - first, changePct = ((change / first) * 100).toFixed(2);
         const isPositive = change >= 0;
-        const color = isPositive ? '#34d399' : '#f87171';
-        document.getElementById('equity-change').innerHTML =
-          `<span class="${isPositive ? 'text-green-400' : 'text-red-400'}">${isPositive ? '+' : ''}${fmt(change)} (${changePct}%)</span>`;
-        if (equityChart) equityChart.destroy();
-        equityChart = new Chart(document.getElementById('equityChart'), {
-          type: 'line',
-          data: {
-            labels: data.labels,
-            datasets: [{ data: data.values, borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { color: '#1e2330' }, ticks: { color: '#6b7280', maxTicksLimit: 8 } },
-              y: { grid: { color: '#1e2330' }, ticks: { color: '#6b7280', callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
-            }
-          }
-        });
+        const changeHtml = `<span class="${isPositive ? 'text-green-400' : 'text-red-400'}">${isPositive ? '+' : ''}${fmt(change)} (${changePct}%)</span>`;
+        document.getElementById('equity-change').innerHTML = changeHtml;
+        if (document.getElementById('equity-change-expanded')) {
+          document.getElementById('equity-change-expanded').innerHTML = changeHtml;
+        }
+        equityChart = createEquityChart('equityChart', data);
+        if (chartExpanded) {
+          equityChartExpanded = createEquityChart('equityChartExpanded', data);
+        }
       } catch (e) { console.error('Chart error:', e); }
+    }
+
+    async function loadChartExpanded(days) {
+      try {
+        const res = await fetch('/api/account-equity?days=' + days);
+        const data = await res.json();
+        const first = data.values[0], last = data.values[data.values.length - 1];
+        const change = last - first, changePct = ((change / first) * 100).toFixed(2);
+        const isPositive = change >= 0;
+        const changeHtml = `<span class="${isPositive ? 'text-green-400' : 'text-red-400'}">${isPositive ? '+' : ''}${fmt(change)} (${changePct}%)</span>`;
+        document.getElementById('equity-change-expanded').innerHTML = changeHtml;
+        equityChartExpanded = createEquityChart('equityChartExpanded', data);
+      } catch (e) { console.error('Expanded chart error:', e); }
     }
 
     // ── Signal Feed ────────────────────────────────────────
@@ -438,7 +539,6 @@
         const res = await fetch('/api/positions');
         const positions = await res.json();
 
-        // Main positions panel
         const list = document.getElementById('positions-list');
         list.innerHTML = positions.length === 0
           ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
@@ -462,7 +562,6 @@
               </div>`;
             }).join('');
 
-        // Auto mode quick actions
         const autoList = document.getElementById('auto-positions-list');
         autoList.innerHTML = positions.length === 0
           ? '<p class="text-xs text-gray-600 text-center">No open positions</p>'
