@@ -86,7 +86,53 @@ async def account_equity(days: int = Query(default=30, ge=30, le=90)):
         "days": days
     }
 
+@app.get("/api/positions")
+async def get_positions():
+    """
+    Returns mock open positions data.
+    In production, this will fetch from Alpaca API.
+    """
+    return {
+        "positions": [
+            {
+                "ticker": "AAPL",
+                "quantity": 50,
+                "avg_price": 170.25,
+                "current_price": 185.50,
+                "pnl": 760.25,
+                "pnl_percent": 8.98
+            },
+            {
+                "ticker": "NVDA",
+                "quantity": 25,
+                "avg_price": 875.00,
+                "current_price": 920.75,
+                "pnl": 1143.75,
+                "pnl_percent": 5.22
+            },
+            {
+                "ticker": "MSFT",
+                "quantity": 30,
+                "avg_price": 380.00,
+                "current_price": 415.20,
+                "pnl": 1056.00,
+                "pnl_percent": 9.26
+            }
+        ]
+    }
 
+@app.post("/api/positions/close")
+async def close_position(ticker: str = Query(...)):
+    """
+    Close a position (mock implementation).
+    In production, this calls Alpaca API to liquidate.
+    """
+    return {
+        "success": True,
+        "message": f"Position {ticker} closed successfully",
+        "ticker": ticker
+    }
+    
 @app.get("/users")
 async def get_users(limit: int = Query(default=5, ge=1, le=100)):
     async with async_session_maker() as session:
