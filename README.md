@@ -53,3 +53,10 @@ We use PostgreSQL (via Docker Compose) and SQLAlchemy/Alembic for data persisten
 - **`user_settings`**: Stores user authentication and profile data.
 
 *For more details on setting up the local database, running migrations, and API endpoints, see the [Database Implementation Plan](./docs/db_implementation_plan.md).*
+
+to run app locally:
+```bash
+cd server
+uv sync
+uv run uvicorn main:app
+```
