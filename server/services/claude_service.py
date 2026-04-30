@@ -31,21 +31,28 @@ class ClaudeService:
 
 Tweet: "{tweet_text}"
 
-Please provide your analysis in the following JSON format:
+Return your analysis in the following strict JSON format:
 {{
     "sentiment": "bullish" or "bearish" or "neutral",
     "confidence_score": 0.0 to 1.0,
     "stock_tickers": ["$AAPL", "$TSLA", "$GOOGL", ...]
 }}
 
-Important notes:
-- Return stock tickers in the format "$TICKER" (with the dollar sign prefix)
-- Only include stock tickers that are actually mentioned in the tweet
-- If no stocks are mentioned, return an empty array for stock_tickers
-- Sentiment should reflect the overall tone regarding the mentioned stocks or market sentiment
-- Confidence score should reflect how certain you are about the sentiment classification
+Guidelines:
+- Sentiment reflects financial outlook (bullish = positive, bearish = negative, neutral = no clear direction).
+- Confidence score should reflect certainty based on clarity and explicit financial language.
+- Return stock tickers in the format "$TICKER".
+- Include tickers if mentioned directly (e.g., "$TSLA") or by company name (e.g., "Tesla" → "$TSLA").
+- If no stocks are mentioned, return an empty array.
+- If sentiment cannot be determined, set sentiment to "neutral" and confidence_score to 0.0.
+- Return ONLY the JSON, no other text.
 
-Return ONLY the JSON, no other text."""
+Example:
+{{
+    "sentiment": "bullish",
+    "confidence_score": 0.87,
+    "stock_tickers": ["$TSLA"]
+}}"""
 
         try:
             message = self.client.messages.create(
