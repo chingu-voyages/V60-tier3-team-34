@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from alpaca.trading.client import TradingClient
-from alpaca.trading.requests import GetOrdersRequest
+from alpaca.trading.requests import GetOrdersRequest, GetPortfolioHistoryRequest
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
@@ -36,7 +36,6 @@ def get_account_info():
 
 
 def get_portfolio_history(days=30):
-
     # Validate input
     valid_periods = {30: "30D", 60: "60D", 90: "90D"}
     if days not in valid_periods:
@@ -46,31 +45,31 @@ def get_portfolio_history(days=30):
 
     try:
         # Fetch portfolio history from Alpaca
-        history = trading_client.get_portfolio_history(
+        request = GetPortfolioHistoryRequest(
             period=period,
             timeframe="1D"
         )
+        history = trading_client.get_portfolio_history(history_filter=request)
 
         # Validate response
-        if not history or not hasattr(history, '__iter__'):
+        if not history or not hasattr(history, 'timestamp') or not hasattr(history, 'equity'):
             raise Exception("Invalid response from Alpaca API")
 
         # Parse response and format for frontend
         labels = []
         values = []
 
-        for item in history:
-            if not hasattr(item, 'timestamp') or not hasattr(item, 'equity'):
-                continue  # Skip malformed entries
-
-            labels.append(item.timestamp.strftime("%b %d"))
-            values.append(float(item.equity))
+        # history.timestamp is a list of unix timestamps
+        # history.equity is a list of equity values
+        for timestamp, equity in zip(history.timestamp, history.equity):
+            dt = datetime.fromtimestamp(timestamp)
+            labels.append(dt.strftime("%b %d"))
+            values.append(float(equity))
 
         if not labels:
             raise Exception("No valid data points received from API")
 
         return {"labels": labels, "values": values}
-
     except Exception as e:
         # Re-raise with context
         raise Exception(f"Failed to fetch portfolio history: {str(e)}") from e
