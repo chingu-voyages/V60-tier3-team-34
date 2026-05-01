@@ -482,21 +482,39 @@
         feed.innerHTML = tweets.length === 0
           ? '<p class="text-xs text-gray-600 text-center mt-8">No signals found</p>'
           : tweets.map(t => {
-              const tickers = (t.tweet_text || '').match(/\$[A-Z]{1,5}/g) || [];
-              const isBullish = /buy|bullish|bull|up|long|boom|soar|surge|gain/i.test(t.tweet_text);
-              const badgeClass = isBullish ? 'badge-buy' : 'badge-sell';
-              const badgeText = isBullish ? 'BULLISH' : 'BEARISH';
-              const tickerBadges = tickers.slice(0,3).map(tk => `<span class="text-xs font-mono font-bold text-blue-300">${tk}</span>`).join(' ');
+              const tickers = (t.stock_tickers || []).slice(0, 3);
+              const isBearish = t.sentiment === 'bearish';
+              const badgeClass = isBearish ? 'badge-buy' : 'badge-sell';
+              const badgeText = isBearish ? 'BEARISH' : 'BULLISH';
+              const tickerBadges = tickers.map(tk => `<span class="text-xs font-mono font-bold text-blue-300">${tk}</span>`).join(' ');
+              const primaryTicker = tickers.length > 0 ? tickers[0] : '';
+              const confidencePercent = (t.confidence_score * 100).toFixed(1);
+              const actionText = t.inverse_action || 'HOLD';
+              const actionClass = actionText === 'BUY' ? 'text-green-400' : actionText === 'SELL' ? 'text-red-400' : 'text-gray-400';
               return `<div class="signal-item">
                 <div class="flex items-center justify-between mb-1">
                   <div class="flex gap-1">${tickerBadges || '<span class="text-xs text-gray-600">General</span>'}</div>
                   <span class="text-xs px-1.5 py-0.5 rounded font-medium ${badgeClass}">${badgeText}</span>
                 </div>
-                <p class="text-xs text-gray-400 leading-relaxed line-clamp-3">${t.tweet_text || ''}</p>
-                ${t.tweet_link ? `<a href="${t.tweet_link}" target="_blank" class="text-xs text-blue-500 hover:underline mt-1 inline-block">View tweet</a>` : ''}
+                <p class="text-xs text-gray-400 leading-relaxed line-clamp-3 mb-2">${t.tweet_text || ''}</p>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs text-gray-500">Confidence: ${confidencePercent}%</span>
+                  <span class="text-xs font-bold ${actionClass}">→ ${actionText}</span>
+                </div>
+                <div class="flex gap-1.5">
+                  ${primaryTicker ? `<button onclick="tradeFromSignal('${primaryTicker}', '${t.inverse_action}')" class="flex-1 py-1.5 rounded text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition">Trade</button>` : ''}
+                  ${t.tweet_link ? `<a href="${t.tweet_link}" target="_blank" class="flex-1 py-1.5 rounded text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 transition text-center">View</a>` : ''}
+                </div>
               </div>`;
             }).join('');
       } catch (e) { console.error('Signal feed error:', e); }
+    }
+
+    function tradeFromSignal(ticker, side) {
+      document.getElementById('trade-ticker').value = ticker.toUpperCase();
+      setSide(side);
+      setMode('manual');
+      document.getElementById('trade-ticker').focus();
     }
 
     // ── Trade History ──────────────────────────────────────
