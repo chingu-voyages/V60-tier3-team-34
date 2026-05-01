@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, or_, join
+from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 from db.database import async_session_maker
 from models.tweet import Tweet
@@ -9,7 +9,6 @@ from models.tweet_sentiment import TweetSentiment
 from models.user_settings import UserSettings
 from pathlib import Path
 from datetime import datetime, timedelta
-import random
 import asyncio
 from services.alpaca_service import get_account_info, get_portfolio_history, get_positions, get_trade_history
 
@@ -57,6 +56,45 @@ async def get_signal_feed(limit: int = Query(default=20, ge=1, le=100), ticker: 
                 "confidence_score": ts.confidence_score,
                 "stock_tickers": ts.stock_tickers,
                 "inverse_action": get_inverse_action(ts.sentiment),
+            }
+            for t, ts in rows
+        ]
+
+@app.get("/api/debug/sentiments")
+async def debug_sentiments(limit: int = Query(default=10, ge=1, le=100)):
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(TweetSentiment).order_by(TweetSentiment.analyzed_at.desc()).limit(limit)
+        )
+        sentiments = result.scalars().all()
+        return [
+            {
+                "id": s.id,
+                "tweet_timestamp": s.tweet_timestamp,
+                "sentiment": s.sentiment,
+                "confidence_score": s.confidence_score,
+                "stock_tickers": s.stock_tickers,
+            }
+            for s in sentiments
+        ]
+
+@app.get("/api/debug/tweets-with-sentiments")
+async def debug_tweets_with_sentiments(limit: int = Query(default=10, ge=1, le=100)):
+    async with async_session_maker() as session:
+        query = select(Tweet, TweetSentiment).outerjoin(
+            TweetSentiment, Tweet.tweet_timestamp == TweetSentiment.tweet_timestamp
+        ).order_by(Tweet.created_at.desc()).limit(limit)
+
+        result = await session.execute(query)
+        rows = result.all()
+
+        return [
+            {
+                "tweet_timestamp": t.tweet_timestamp,
+                "tweet_text": t.tweet_text[:50] if t.tweet_text else None,
+                "has_sentiment": ts is not None,
+                "sentiment": ts.sentiment if ts else None,
+                "stock_tickers": ts.stock_tickers if ts else None,
             }
             for t, ts in rows
         ]
