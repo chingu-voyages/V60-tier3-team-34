@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About - TradeApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="background:#0b0e14; color:#e5e7eb; font-family:system-ui;">
+
+  <div style="max-width:900px; margin:40px auto; padding:20px;">
+
+    <!-- HEADER -->
+    <h1 style="font-size:26px; font-weight:700; margin-bottom:8px;">
+      TradeApp
+    </h1>
+
+    <p style="color:#9ca3af; margin-bottom:30px;">
+      A simulated trading dashboard powered by real-time sentiment signals and portfolio tracking.
+    </p>
+
+    <!-- OVERVIEW -->
+    <section style="margin-bottom:30px;">
+      <h2 style="font-size:18px; margin-bottom:10px;">Overview</h2>
+      <p style="color:#9ca3af; line-height:1.6;">
+        TradeApp simulates market behavior by converting scraped financial tweets into structured trading signals.
+        It allows users to execute trades, monitor positions, and track performance in a dynamic environment.
+      </p>
+    </section>
+
+    <!-- DATABASE -->
+    <section style="margin-bottom:30px;">
+      <h2 style="font-size:18px; margin-bottom:10px;">Database Architecture</h2>
+
+      <p style="color:#9ca3af; margin-bottom:10px;">
+        Built using PostgreSQL with SQLAlchemy ORM and Alembic migrations.
+      </p>
+
+      <div style="background:#13161f; padding:15px; border-radius:8px;">
+
+        <p><strong>tweets</strong> — Stores scraped Twitter/X data (signal source)</p>
+        <p><strong>tweet_sentiments</strong> — AI sentiment + stock extraction</p>
+        <p><strong>user_settings</strong> — User configs & trading preferences</p>
+
+      </div>
+    </section>
+
+    <!-- RUN LOCALLY -->
+    <section style="margin-bottom:30px;">
+      <h2 style="font-size:18px; margin-bottom:10px;">Run Locally</h2>
+
+      <div style="background:#13161f; padding:15px; border-radius:8px; font-family:monospace; font-size:13px;">
+cd server<br/>
+uv sync<br/>
+uv run uvicorn main:app
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section style="margin-bottom:30px;">
+      <h2 style="font-size:18px; margin-bottom:10px;">Team</h2>
+
+      <ul style="color:#9ca3af; line-height:1.8; padding-left:18px;">
+        <li>Alex Thomas — Scrum Master</li>
+        <li>Sobebar Ali</li>
+        <li>Tomislav Dukez</li>
+        <li>Ndzana Christophe</li>
+        <li>Srikaanth Balajhi</li>
+        <li>Conrado Figari Vechio — Product Owner</li>
+        <li>Peter Kabamba</li>
+        <li>John Ezekiel</li>
+      </ul>
+    </section>
+
+    <!-- DATABASE PLAN -->
+    <section>
+      <h2 style="font-size:18px; margin-bottom:10px;">Database Implementation Plan</h2>
+
+      <p style="color:#9ca3af; line-height:1.6;">
+        Supabase-backed PostgreSQL system designed to persist scraped tweets, AI-generated signals,
+        and user configurations with duplicate prevention and migration support.
+      </p>
+
+      <p style="color:#9ca3af; margin-top:10px;">
+        Key components: migrations (Alembic), local Docker Postgres, and upsert-based ingestion pipeline.
+      </p>
+    </section>
+
+  </div>
+
+</body>
+</html>
