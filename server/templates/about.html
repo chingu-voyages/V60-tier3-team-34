@@ -2,91 +2,190 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>About - TradeApp</title>
+  <title>About - CramerBot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background:#0b0e14;
+      color:#e5e7eb;
+      font-family: system-ui;
+      margin:0;
+    }
+
+    .container {
+      max-width:900px;
+      margin:40px auto;
+      padding:24px;
+    }
+
+    h1 {
+      font-size:28px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    h2 {
+      font-size:16px;
+      margin-bottom:12px;
+      color:#f3f4f6;
+      letter-spacing:0.2px;
+    }
+
+    p {
+      color:#9ca3af;
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .section {
+      margin-bottom:28px;
+    }
+
+    .card {
+      background:#13161f;
+      border:1px solid #1f2937;
+      border-radius:10px;
+      padding:14px;
+    }
+
+    .card p {
+      margin:6px 0;
+    }
+
+    .code {
+      background:#13161f;
+      border:1px solid #1f2937;
+      border-radius:10px;
+      padding:12px;
+      font-family: monospace;
+      font-size:12px;
+      color:#9ca3af;
+      overflow-x:auto;
+    }
+
+    a {
+      color:#60a5fa;
+      text-decoration:none;
+    }
+
+    a:hover {
+      color:#93c5fd;
+    }
+
+    ul {
+      color:#9ca3af;
+      line-height:1.8;
+      padding-left:18px;
+    }
+  </style>
 </head>
 
-<body style="background:#0b0e14; color:#e5e7eb; font-family:system-ui;">
+<body>
 
-  <div style="max-width:900px; margin:40px auto; padding:20px;">
+<div class="container">
 
-    <!-- HEADER -->
-    <h1 style="font-size:26px; font-weight:700; margin-bottom:8px;">
-      TradeApp
-    </h1>
+  <!-- HEADER -->
+  <h1>CramerBot</h1>
+  <p>
+    A simulated trading dashboard powered by real-time sentiment signals and portfolio tracking.
+  </p>
 
-    <p style="color:#9ca3af; margin-bottom:30px;">
-      A simulated trading dashboard powered by real-time sentiment signals and portfolio tracking.
+  <!-- OVERVIEW -->
+  <section class="section">
+    <h2>Overview</h2>
+    <p>
+      CramerBot simulates market behavior by converting scraped financial tweets into structured trading signals.
+      It allows users to execute trades, monitor positions, and track performance in a dynamic environment.
+    </p>
+  </section>
+
+  <!-- DATABASE -->
+  <section class="section">
+    <h2>Database Architecture</h2>
+
+    <p>
+      Built using PostgreSQL with SQLAlchemy ORM and Alembic migrations.
     </p>
 
-    <!-- OVERVIEW -->
-    <section style="margin-bottom:30px;">
-      <h2 style="font-size:18px; margin-bottom:10px;">Overview</h2>
-      <p style="color:#9ca3af; line-height:1.6;">
-        TradeApp simulates market behavior by converting scraped financial tweets into structured trading signals.
-        It allows users to execute trades, monitor positions, and track performance in a dynamic environment.
-      </p>
-    </section>
+    <div class="card">
+      <p><strong>tweets</strong> — Stores scraped Twitter/X data (signal source)</p>
+      <p><strong>tweet_sentiments</strong> — AI sentiment + stock extraction</p>
+      <p><strong>user_settings</strong> — User configs & trading preferences</p>
+    </div>
+  </section>
 
-    <!-- DATABASE -->
-    <section style="margin-bottom:30px;">
-      <h2 style="font-size:18px; margin-bottom:10px;">Database Architecture</h2>
+  <!-- RUN LOCALLY -->
+  <section class="section">
+    <h2>Run Locally</h2>
 
-      <p style="color:#9ca3af; margin-bottom:10px;">
-        Built using PostgreSQL with SQLAlchemy ORM and Alembic migrations.
-      </p>
-
-      <div style="background:#13161f; padding:15px; border-radius:8px;">
-
-        <p><strong>tweets</strong> — Stores scraped Twitter/X data (signal source)</p>
-        <p><strong>tweet_sentiments</strong> — AI sentiment + stock extraction</p>
-        <p><strong>user_settings</strong> — User configs & trading preferences</p>
-
-      </div>
-    </section>
-
-    <!-- RUN LOCALLY -->
-    <section style="margin-bottom:30px;">
-      <h2 style="font-size:18px; margin-bottom:10px;">Run Locally</h2>
-
-      <div style="background:#13161f; padding:15px; border-radius:8px; font-family:monospace; font-size:13px;">
+    <div class="code">
 cd server<br/>
 uv sync<br/>
 uv run uvicorn main:app
-      </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- TEAM -->
-    <section style="margin-bottom:30px;">
-      <h2 style="font-size:18px; margin-bottom:10px;">Team</h2>
+  <!-- TEAM -->
+  <section class="section">
+    <h2>Team</h2>
 
-      <ul style="color:#9ca3af; line-height:1.8; padding-left:18px;">
-        <li>Alex Thomas — Scrum Master</li>
-        <li>Sobebar Ali</li>
-        <li>Tomislav Dukez</li>
-        <li>Ndzana Christophe</li>
-        <li>Srikaanth Balajhi</li>
-        <li>Conrado Figari Vechio — Product Owner</li>
-        <li>Peter Kabamba</li>
-        <li>John Ezekiel</li>
-      </ul>
-    </section>
+    <ul>
 
-    <!-- DATABASE PLAN -->
-    <section>
-      <h2 style="font-size:18px; margin-bottom:10px;">Database Implementation Plan</h2>
+      <li>
+        Alex Thomas — Scrum Master —
+        <a href="https://github.com/BagelTime" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/ajt11176" target="_blank">LinkedIn</a>
+      </li>
 
-      <p style="color:#9ca3af; line-height:1.6;">
-        Supabase-backed PostgreSQL system designed to persist scraped tweets, AI-generated signals,
-        and user configurations with duplicate prevention and migration support.
-      </p>
+      <li>
+        Conrado Figari Vechio — Product Owner —
+        <a href="https://github.com/conradofigariv" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/conradofigarivechio/" target="_blank">LinkedIn</a>
+      </li>
 
-      <p style="color:#9ca3af; margin-top:10px;">
-        Key components: migrations (Alembic), local Docker Postgres, and upsert-based ingestion pipeline.
-      </p>
-    </section>
+      <li>
+        Tomislav Dukez —
+        <a href="https://github.com/tomdu3" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/tomislav-dukez" target="_blank">LinkedIn</a>
+      </li>
 
-  </div>
+      <li>
+        Ndzana Christophe —
+        <a href="https://github.com/christoban" target="_blank">GitHub</a> ·
+        <a href="#" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        Srikaanth Balajhi —
+        <a href="https://github.com/srikaanthtb" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/srikaanth-balajhi-4b6171131/" target="_blank">LinkedIn</a>
+      </li>
+
+      <li>
+        John Omokhagbon Ezekiel —
+        <a href="https://github.com/Sirius1616" target="_blank">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/john-ezekiel-dev/" target="_blank">LinkedIn</a>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- DATABASE IMPLEMENTATION PLAN -->
+  <section class="section">
+    <h2>Database Implementation Plan</h2>
+
+    <p>
+      Supabase-backed PostgreSQL system designed to persist scraped tweets, AI-generated signals,
+      and user configurations with duplicate prevention and migration support.
+    </p>
+
+    <p>
+      Key components: migrations (Alembic), local Docker Postgres, and upsert-based ingestion pipeline.
+    </p>
+  </section>
+
+</div>
 
 </body>
 </html>
