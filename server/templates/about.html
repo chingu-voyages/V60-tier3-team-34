@@ -93,12 +93,27 @@
 
   <!-- OVERVIEW -->
   <section class="section">
-    <h2>Overview</h2>
-    <p>
-      CramerBot simulates market behavior by converting scraped financial tweets into structured trading signals.
-      It allows users to execute trades, monitor positions, and track performance in a dynamic environment.
-    </p>
-  </section>
+  <h2>Overview</h2>
+
+  <p>
+    CramerBot is an AI-powered trading system that converts real-time financial commentary into structured trading signals.
+    It operates as a data pipeline that ingests tweets from Jim Cramer, processes them using large language models,
+    and translates the output into actionable market positions.
+  </p>
+
+  <div class="card">
+    <p><strong>Data Source:</strong> Tweets scraped from Jim Cramer (financial commentary)</p>
+    <p><strong>AI Processing:</strong> Sentiment and ticker extraction using Anthropic</p>
+    <p><strong>Execution Layer:</strong> Trade simulation and execution via Alpaca API</p>
+    <p><strong>Frontend:</strong> Real-time dashboard for signals, positions, and trade history</p>
+  </div>
+
+  <p>
+    This architecture enables experimentation with sentiment-driven trading strategies,
+    bridging unstructured market opinions and systematic execution.
+  </p>
+
+</section>
 
   <!-- DATABASE -->
   <section class="section">
