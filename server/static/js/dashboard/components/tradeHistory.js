@@ -50,14 +50,14 @@ function renderTrades() {
       const cancelButton = canCancel
         ? `<button data-cancel-order data-order-id="${escapeAttribute(t.id)}" data-ticker="${escapeAttribute(t.ticker)}" class="px-2 py-1 rounded text-xs font-medium bg-red-900 hover:bg-red-800 text-red-300 transition">Cancel</button>`
         : '<span class="text-xs text-gray-600">—</span>';
-      return `<tr class="text-sm hover:bg-gray-800 transition">
-        <td class="py-2.5 font-mono font-bold text-white">${escapeHtml(t.ticker)}</td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-xs font-medium ${t.side === 'BUY' ? 'badge-buy' : 'badge-sell'}">${escapeHtml(t.side)}</span></td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-xs ${statusClass[t.status] || ''}">${escapeHtml(t.status)}</span></td>
-        <td class="py-2.5 text-right text-gray-300">${escapeHtml(t.qty)}</td>
-        <td class="py-2.5 text-right text-gray-300">${fmt(t.price)}</td>
-        <td class="py-2.5 text-right text-gray-500 text-xs">${escapeHtml(t.time)}</td>
-        <td class="py-2.5 text-right">${cancelButton}</td>
+      return `<tr class="trade-row text-sm hover:bg-gray-800 transition">
+        <td data-label="Ticker" class="trade-cell trade-cell-ticker py-2.5 font-mono font-bold text-white">${escapeHtml(t.ticker)}</td>
+        <td data-label="Side" class="trade-cell py-2.5"><span class="px-2 py-0.5 rounded text-xs font-medium ${t.side === 'BUY' ? 'badge-buy' : 'badge-sell'}">${escapeHtml(t.side)}</span></td>
+        <td data-label="Status" class="trade-cell py-2.5"><span class="px-2 py-0.5 rounded text-xs ${statusClass[t.status] || ''}">${escapeHtml(t.status)}</span></td>
+        <td data-label="Qty" class="trade-cell py-2.5 text-right text-gray-300">${escapeHtml(t.qty)}</td>
+        <td data-label="Price" class="trade-cell py-2.5 text-right text-gray-300">${fmt(t.price)}</td>
+        <td data-label="Time" class="trade-cell py-2.5 text-right text-gray-500 text-xs">${escapeHtml(t.time)}</td>
+        <td data-label="Action" class="trade-cell py-2.5 text-right">${cancelButton}</td>
       </tr>`;
     }).join('');
 }

@@ -27,6 +27,22 @@ body {
   padding: 16px 20px;
 }
 
+@media (max-width: 639px) {
+  .stat-card {
+    padding: 12px 14px;
+  }
+  .stat-card .text-xl {
+    font-size: 1.05rem;
+  }
+}
+
+@media (pointer: coarse) {
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
 .signal-item {
   border-bottom: 1px solid #1e2330;
   padding: 12px 0;
@@ -74,6 +90,60 @@ body {
 .badge-cancelled {
   background: #2d1515;
   color: #f87171;
+}
+
+/* Trade history responsive: table on lg+, stacked cards below lg */
+@media (max-width: 1023px) {
+  .trade-thead {
+    display: none;
+  }
+  .trade-table,
+  .trade-tbody,
+  .trade-row,
+  .trade-cell {
+    display: block;
+    width: 100%;
+  }
+  .trade-tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .trade-tbody > * + * {
+    border-top: 0 !important;
+  }
+  .trade-row {
+    background: #13161f;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .trade-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+    text-align: right;
+  }
+  .trade-cell::before {
+    content: attr(data-label);
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .trade-cell-ticker {
+    font-size: 1rem;
+    border-bottom: 1px solid #1f2937;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  .trade-cell-ticker::before {
+    color: #9ca3af;
+  }
 }
 
 /* Tabs */

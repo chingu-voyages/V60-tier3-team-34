@@ -16,6 +16,20 @@ async function refreshAccountData() {
   ]);
 }
 
+function initMobileNav() {
+  const navToggle = document.getElementById('nav-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (!navToggle || !mobileMenu) return;
+  navToggle.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+  mobileMenu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+    });
+  });
+}
+
 function initDashboard() {
   initTradePanel({ refreshAccountData });
   initEnvToggle({ refreshAccountData });
@@ -23,6 +37,7 @@ function initDashboard() {
   initSignalFeed({ tradeFromSignal });
   initTradeHistory({ refreshAccountData, setTradePending, showTradeMessage });
   initPositions({ refreshAccountData, setTradePending, showTradeMessage });
+  initMobileNav();
   refreshAccountData();
   loadSignals();
   setInterval(loadSignals, 60000);
